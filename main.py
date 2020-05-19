@@ -4,6 +4,8 @@ File: main.py
 Program to track screenshots to change in technical documentation.
 """
 
+import json
+
 def main():
     # TODO: Get a URL (Page in app path) from user, store it
     # TODO: Get a list of screenshots associated with that URL from user, store it
@@ -13,32 +15,35 @@ def main():
     # TODO: Tell the user there are changes to path and to check screenshots
     # TODO: If there is no visual diff for a path, return a message to the user to let her know there are no changes
 
-    user_selects = int(input("What would you like to do? \n 1. Create a new project \n 2. Add a URL to a project \n "
-                             "3. Add a screenshot to a URL \n 4. Diff URLs \n"))
-
+    user_selects = int(input("What would you like to do? \n 1. Add a URL to a project \n 2. Diff URLs \n"))
 
     if user_selects == 1:
-        create_project()
-    if user_selects == 2:
-        open_project = input(str("Which project would you like to open? "))
-        to_watch = add_url_to_project()
+        project_name = get_project_name()
+        existing_content = open_project(project_name)
+        to_watch = add_urls_and_screenshots(existing_content)
         print("You have added these URLs and screenshots to watch: ")
         print_to_watch(to_watch)
-        save_url_to_project(open_project, to_watch)
+        save_project(to_watch, project_name)
 
+def get_project_name():
+    return input(str("Which project would you like to open? "))
 
-def create_project():
-    file = open(input(str("Name your project: ")), "x")
+def open_project(filename):
+    with open(filename, "r") as current_project:
+        existing_content = json.load(current_project)
+        return existing_content
 
-def add_url_to_project():
+def save_project(project_dictionary, project_filename):
+    with open(project_filename, 'w') as savefile:
+        json.dump(project_dictionary, savefile)
+
+def add_urls_and_screenshots(existing_content):
     '''
     Asks the user for URLs to watch, and any screenshots associated with that URL.
     Returns the dictionary of things to watch.
     '''
 
-
-
-    to_watch = {}
+    to_watch = existing_content
 
     while True:
         url_to_watch = input("What URL do you want to watch? " )
@@ -62,29 +67,6 @@ def print_to_watch(to_watch):
     for url_to_watch in to_watch:
         print(url_to_watch, "->", to_watch[url_to_watch])
 
-def save_url_to_project(open_project, to_watch):
-    current_project = open(open_project, "a")
-    current_project.write(str(to_watch))
-    current_project.close
-
-'''
-def open_project():
-    open_project = input(str("Which project would you like to open? "))
-    return open_project
-
-def get_url_path():
-    open_project = open(input(str("Which project would you like to open? ")), "a")
-    urls_in_project = {}  # Create an empty list of urls in a project
-    open_project.write(input(str("What is the URL of the page you'd like to watch? ")))
-    open_project.close()
-
-    url_to_watch = open(input(str("Which project would you like to verify?")), "r")
-    print(url_to_watch.read())
-
-def add_screenshot_to_url(url_to_watch):
-    url_to_watch[].append
-
-'''
 
 if __name__ == '__main__':
     main()
