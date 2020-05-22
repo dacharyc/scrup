@@ -30,8 +30,18 @@ def main():
         # Give the user a success message letting them know what URLs and screenshots they've added to the project
         print("You have added these URLs and screenshots to watch: ")
         print_to_watch(to_watch)
+        # Extract a list of all of the keys (URLs) contained in the dictionary
+        list_of_urls = extract_urls(to_watch)
+        # Process the URLs so Diffy can use them
+        processed_urls = convert_urls_for_diffy(list_of_urls)
+        # Update the URLs in Diffy
+        headers = get_default_headers_from_diffy()
+        update_status = update_project(headers, processed_urls)
+        print(update_status)
         # Convert the dictionary to JSON, and save it using the project name the user entered above
         save_project(to_watch, project_name)
+
+
 
     # When the user wants to "Diff URLs"
     if user_selects == 2:
@@ -117,12 +127,10 @@ def print_to_watch(to_watch):
         print(url_to_watch, "->", to_watch[url_to_watch])
 
 def extract_urls(urls_in_project):
-    '''
-    Create an empty list, and then loop through the keys in the dictionary - in this case, URLs, adding them
+    '''Create an empty list, and then loop through the keys in the dictionary - in this case, URLs, adding them
     to the empty list.
     :param urls_in_project: This is a dictionary containing all of the URLs and screenshots in the project.
-    :return: The list of keys (URLs) that we've extracted from the dictionary.
-    '''
+    :return: The list of keys (URLs) that we've extracted from the dictionary.'''
     list_of_urls = []
     for keys in urls_in_project.keys():
          list_of_urls.append(keys)
@@ -177,12 +185,11 @@ def calculate_project_inventory_size(total_screenshots):
 
 # These commands are for using the Diffy API
 
+'''
 def get_list_of_urls_for_project():
-    '''
     Ask the user what project they want to open, open the project, convert the JSON to a Python dictionary, extract
     the list of all the URLs contained in the dictionary.
     :return: The list of all the keys (URLs) contained in the project dictionary.
-    '''
     # Ask the user to enter a project name, and store it as a variable
     project_name = get_project_name()
     # Use the filename that the user entered to open the project file and convert the JSON to a Python dictionary
@@ -190,6 +197,7 @@ def get_list_of_urls_for_project():
     # Extract a list of all of the keys (URLs) contained in the dictionary
     url_list = extract_urls(project_dict)
     return url_list
+'''
 
 def convert_urls_for_diffy(url_list):
     '''
@@ -223,16 +231,21 @@ def add_slashes(base_urls):
         urls_with_slashes.append(new_url)
     return urls_with_slashes
 
-# TODO: def suck_in_stuff_from_api():
-    # Get Project Info from API
-    # Convert it to a dictionary from JSON
-    # return dictionary (to main)
+def update_project(header, url_list):
+    url = "https://app.diffy.website/api/projects/2470"
+    response = requests.get(url, headers=header)
+    project_dict = json.loads(response.text)
+    project_dict['urls'] = url_list
+    r = requests.post(url, headers=header, data=json.dumps(project_dict))
+    return str(r.status_code)
 
-# TODO: def convert_stuff_to_json_and_post():
-    # Get the dictionary from main
-    # Convert it from a dictionary to JSON
-    # Post JSON to the Diffy API
-    # return API Status Code
+def get_default_headers_from_diffy():
+    payload = {"key": "816e6d80f424c910b4f05cf1e34d994c"}
+    response = requests.post("https://app.diffy.website/api/auth/key", data=json.dumps(payload))
+    token = json.loads(response.text)["token"]
+    abt = "Bearer " + token
+    default_header = {"Authorization": abt}
+    return default_header
 
 if __name__ == '__main__':
     main()
