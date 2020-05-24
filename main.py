@@ -32,12 +32,11 @@ def main():
         print_to_watch(to_watch)
         # Extract a list of all of the keys (URLs) contained in the dictionary
         list_of_urls = extract_urls(to_watch)
-        # Process the URLs so Diffy can use them
-        processed_urls = convert_urls_for_diffy(list_of_urls)
         # Update the URLs in Diffy
         headers = get_default_headers_from_diffy()
-        update_status = update_project(headers, processed_urls)
-        print(update_status)
+        update_status = update_project(headers, list_of_urls)
+        # Translate the API response code to something meaningful to the user, and print it
+        print(human_readable_status_codes(update_status))
         # Convert the dictionary to JSON, and save it using the project name the user entered above
         save_project(to_watch, project_name)
 
@@ -48,9 +47,6 @@ def main():
         # Ask the User for a project name, and then get the list of URLs that are in that project
         url_list = get_list_of_urls_for_project()
         print(url_list) # Print the list of URLs for verification/debugging
-        # Posts to Diffy require backslashes in URLs preceding forward slashes. This function adds backslashes
-        # so the list of URLs is ready to go to Diffy
-        processed_urls = convert_urls_for_diffy(url_list)
         # Perform a Get request using Diffy's REST API to retreive Project Info, and convert it to a Python dictionary
         # stored as my_dictionary
         my_dictionary = suck_in_stuff_from_api()
@@ -246,6 +242,11 @@ def get_default_headers_from_diffy():
     abt = "Bearer " + token
     default_header = {"Authorization": abt}
     return default_header
+
+def human_readable_status_codes(status_code):
+    missing_value = "Diffy returned an unrecognized response."
+    human_readable = {"200": "Your URLs were successfully updated in Diffy", "400": "The domain in one of your URLs did not match the production domain in Diffy", "401": "There was a problem authenticating with Diffy"}
+    return human_readable.get(status_code, missing_value)
 
 if __name__ == '__main__':
     main()
