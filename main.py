@@ -143,7 +143,7 @@ def main():
                 # Show the user a list of URLs that are currently in the inventory
                 current_urls = extract_urls(screenshot_inventory)
                 print("These are the URLs that are currently in your inventory: ")
-                print(current_urls)
+                print('\n'.join(map(str, current_urls)))
                 # Ask the user which URL (key) they want to update screenshots for?
                 key = input("For which URL would you like to update screenshots? ")
                 # Show the user a list of screenshots (values) currently associated with that URL
