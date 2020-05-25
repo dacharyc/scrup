@@ -17,9 +17,9 @@ def main():
     # TODO: If there is no visual diff for a path, return a message to the user to let her know there are no changes
 
     # Ask the user what they would like to do in the program, and capture that as a variable
-    user_selects = int(input("What would you like to do? \n 1. Add a URL to a project \n 2. Diff URLs \n 3. Calculate screenshot inventory coverage \n"))
+    user_selects = int(input("What would you like to do? \n 1. Build the screenshot inventory \n 2. Check a diff for changes to URLs \n 3. Calculate screenshot inventory coverage \n"))
 
-    # When the user wants to "Add a URL to a project":
+    # When the user wants to "Build the screenshot inventory":
     if user_selects == 1:
         # Ask the user for a project name
         project_name = get_project_name()
@@ -42,11 +42,34 @@ def main():
 
 
 
-    # When the user wants to "Diff URLs"
+    # When the user wants to "Check a diff for changes to the URLs"
     if user_selects == 2:
         # Ask the User for a project name, and then get the list of URLs that are in that project
         url_list = get_list_of_urls_for_project()
         print(url_list) # Print the list of URLs for verification/debugging
+        # Give the user two options:
+        user_diff_pref = int(input(
+            "Which diff would you like to check for changes? \n 1. Check the most recent diff \n 2. Specify a diff to check \n"))
+            # Check most recent diff
+            if user_diff_pref == 1:
+                # Get list of diffs from Diffy, store the ID from the most recent
+                headers = get_default_headers_from_diffy()
+                diff_id = get_most_recent_diff_id(headers)
+            # Specify a diff
+            if user_diff_pref == 2:
+                # Get input from the user, store it to a var
+                diff_id = input("What is the ID of the diff you'd like to check?")
+        # Get the list of URLs that have changes in Diffy
+        diffy_data_dump = get_diff_data_from_diffy(diff_id)
+        diffy_dict = dict_urls_and_scores_from_diffy(diffy_data_dump)
+        urls_with_changes = generate_list_of_changed_urls(diffy_dict)
+
+        # Extract URLs with changes from the diff
+        # Display a list of URLs that have changed to the user
+        # Give the user a list of screenshots to check for each URL that changed
+
+
+
         # Perform a Get request using Diffy's REST API to retreive Project Info, and convert it to a Python dictionary
         # stored as my_dictionary
         my_dictionary = suck_in_stuff_from_api()
@@ -247,6 +270,43 @@ def human_readable_status_codes(status_code):
     missing_value = "Diffy returned an unrecognized response."
     human_readable = {"200": "Your URLs were successfully updated in Diffy", "400": "The domain in one of your URLs did not match the production domain in Diffy", "401": "There was a problem authenticating with Diffy"}
     return human_readable.get(status_code, missing_value)
+
+def get_most_recent_diff_id(header):
+    url = "https://app.diffy.website/api/projects/2470/diffs"
+    response = requests.get(url, headers=header)
+    diff_list = json.loads(response.text)
+    diff_id = diff_list['id']
+    return diff_id
+
+def get_diff_data_from_diffy(id):
+    url = "https://app.diffy.website/api/diffs/" + id
+    header = get_default_headers_from_diffy()
+    response = results.get(url, headers=header)
+    return response
+
+def dict_urls_and_scores_from_diffy(response):
+    diffs_dict = response["diffs"]
+    urls_and_scores = {}
+    for url in diffs_dict.keys():
+        scores = []
+        # Rewrite this with the d.items() method that returns keys and values
+        for sizes_dictionary in diffs_dict[url]:
+            for size in sizes_dictionary.keys():
+                for specific_size_dict in sizes_dictionary[size]:
+                    scores.append(specific_size_dict['diff']['score'])
+        urls_and_scores[url] = scores
+    return urls_and_scores
+
+def check_for_changed_url(scores):
+    return any(x != 0 for x in scores)
+
+def generate_list_of_changed_urls(urls_and_scores):
+    list_of_changed_urls = []
+    for url,scores in urls_and_scores.items():
+        if check_for_changed_url(scores):
+            list_of_changed_urls.append(url)
+    return list_of_changed_urls
+
 
 if __name__ == '__main__':
     main()
