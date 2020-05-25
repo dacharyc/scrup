@@ -231,7 +231,7 @@ def main():
             print('\n'.join(map(str, processed_changed_urls)))
             print("Review these screenshots for each changed URL: ")
             # Pass the list of URLs to the screenshot inventory dictionary as keys, and print the keys and the values (screenshots)
-            get_screenshots_for_urls(processed_changed_urls, screenshot_inventory)
+            print_screenshots_for_urls(processed_changed_urls, screenshot_inventory)
 
         if user_selects == 4:
             break
@@ -340,12 +340,13 @@ def update_urls_to_watch(urls_to_watch, screenshot_inventory):
         del screenshot_inventory[url]
     return screenshot_inventory
 
-def get_screenshots_for_urls(urls, screenshot_inventory):
+def print_screenshots_for_urls(urls, screenshot_inventory):
     for url in urls:
         screenshots = screenshot_inventory.get(url, MISSING_VALUE)
         if len(screenshots) > 0:
+            print("For the URL " + url + ": \n Review these screenshots:")
             for screenshot in screenshots:
-                print(url + " : " + screenshot)
+                print("\t * " + screenshot)
         else:
             print("There were no screenshots found for " + url)
 
