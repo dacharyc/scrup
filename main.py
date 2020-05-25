@@ -11,11 +11,7 @@ MISSING_VALUE = []
 
 def main():
     # TODO: Test that a project name is valid
-    # TODO: Test that a project file (reading a file) exists, if not, return an empty dictionary
     # TODO: Improve project name stuff (don't require a file type, give a user a list of projects to choose from)
-    # TODO: If there is a visual diff for a path, return the path name for the user, along with a list of screenshots associated with that path name
-    # TODO: Tell the user there are changes to path and to check screenshots
-    # TODO: If there is no visual diff for a path, return a message to the user to let her know there are no changes
 
     while True:
         # Ask the user what they would like to do in the program, and capture that as a variable
@@ -31,6 +27,7 @@ def main():
                 # Prompt the user for inputs
                 name = input("What would you like to name your project? ")
                 base_url = input("What is the base URL for your project, as you've entered it in Diffy? ")
+                base_url = strip_trailing_slashes(base_url)
                 screenshots_in_external_library = int(input("How many screenshots are currently in your external library? "))
                 diffy_project_id = int(input("What is the project ID in Diffy? "))
                 # Store inputs in the project metadata dictionary
@@ -74,6 +71,7 @@ def main():
                     project_metadata["name"] = name
                 if key_to_change == 2:
                     base_url = input("What is the new base URL you'd like to use in your project? ")
+                    base_url = strip_trailing_slashes(base_url)
                     project_metadata["base_url"] = base_url
                 if key_to_change == 3:
                     screenshots_in_external_library = int(input("What is the updated number of screenshots in your external library? "))
@@ -146,6 +144,7 @@ def main():
                 print('\n'.join(map(str, current_urls)))
                 # Ask the user which URL (key) they want to update screenshots for?
                 key = input("For which URL would you like to update screenshots? ")
+                key = strip_trailing_slashes(key)
                 # Show the user a list of screenshots (values) currently associated with that URL
                 print("These are the screenshots currently associated with this URL: ")
                 screenshots_for_key = screenshot_inventory.get(key, MISSING_VALUE)
@@ -294,6 +293,7 @@ def add_urls(url_list):
     updated_urls = url_list
     while True:
         new_urls = input("What URL do you want to watch? ")
+        new_urls = strip_trailing_slashes(new_urls)
         if new_urls == "":
             break
         updated_urls.append(new_urls)
@@ -301,6 +301,7 @@ def add_urls(url_list):
 
 def remove_urls(url_list):
     remove_url = input("Which URL do you want to remove? ")
+    remove_url = strip_trailing_slashes(remove_url)
     while remove_url in url_list:
         url_list.remove(remove_url)
         return url_list
@@ -396,6 +397,12 @@ def calculate_project_inventory_size(screenshot_inventory):
         for screenshot in screenshots:
             total += 1
     return total
+
+# These commands are for formatting things for various reasons
+
+def strip_trailing_slashes(input):
+    stripped_input = input.strip('/')
+    return stripped_input
 
 # These commands are for using the Diffy API
 
