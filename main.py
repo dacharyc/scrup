@@ -321,9 +321,11 @@ def add_screenshots(current_screenshots):
 
 def remove_screenshots(current_screenshots):
     remove_screenshot = input("Which screenshot do you want to remove? ")
-    if remove_screenshot in current_screenshots:
+    while remove_screenshot in current_screenshots:
         current_screenshots.remove(remove_screenshot)
-    return current_screenshots
+        return current_screenshots
+    else:
+        print("That is not a valid screenshot in the inventory.")
 
 def extract_urls(urls_in_project):
     '''Create an empty list, and then loop through the keys in the dictionary - in this case, URLs, adding them
