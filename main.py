@@ -406,6 +406,13 @@ def strip_trailing_slashes(input):
     stripped_input = input.strip('/')
     return stripped_input
 
+def add_base_url(urls_from_diffy, base_url):
+    processed_urls = []
+    for url in urls_from_diffy:
+        full_url = str(base_url + url)
+        processed_urls.append(full_url)
+    return processed_urls
+
 # These commands are for using the Diffy API
 
 def get_default_headers_from_diffy():
@@ -479,43 +486,6 @@ def get_project_info_from_diffy(project_id, header):
     diffy_dict = json.loads(response.text)
     return diffy_dict
 
-def add_base_url(urls_from_diffy, base_url):
-    processed_urls = []
-    for url in urls_from_diffy:
-        full_url = str(base_url + url)
-        processed_urls.append(full_url)
-    return processed_urls
-
-''' Deprecated methods: The Junkyard
-
-def convert_urls_for_diffy(url_list):
-    To update the URLs in the project using Diffy's API, we must POST a list of all of the URLs in the project in a
-    specific format. This function calls the add_slashes method, passing in the list of all the URLs that the user has
-    entered, so they can be formatted to the manner that Diffy requires.
-    :param url_list: This function receives a list of all of the URLs that are currently in the project.
-    :return: The list of processed URLs that are ready to be converted to JSON and POSTed to Diffy.
-    project_urls = url_list
-    processed_urls = add_slashes(project_urls)
-    return processed_urls
-
-def add_slashes(base_urls):
-    Diffy requires a list of URLs that contains a \ before every /. This function takes the URLs that the user has entered,
-    and adds a \ before every URL per Diffy's requirements. https://www.google.com/ would become https:\/\/www.google.com\/
-    :param base_urls: This is the list of URLs in the project, passed in as the project_urls list from the
-    convert_urls_for_diffy method.
-    :return: List of URLs that have been processed to contain the extra \.
-    # Create an empty list to store the modified strings
-    urls_with_slashes = []
-    # Loop through all of the URLs in the base_urls list, replacing the "/" with a "\/" and then appending it to the
-    # new list created above. NOTE: the extra \ is required because Python treats the single \ as an escape. When printing
-    # these converted URLs for debugging, they will appear to contain two backslashes before every forward slash
-    # i.e. "\\/" - but using len() to verify the length of these strings confirms that is a display issue and the strings
-    # are actually correctly formatted for passing to Diffy.
-    for url in base_urls:
-        new_url = url.replace("/", '\\/')
-        urls_with_slashes.append(new_url)
-    return urls_with_slashes
-'''
 
 
 if __name__ == '__main__':
