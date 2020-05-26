@@ -9,6 +9,8 @@ import requests
 
 MISSING_VALUE = []
 
+DIFFY_API_KEY = "INSERT YOUR DIFFY API KEY HERE"
+
 def main():
     # TODO: Test that a project name is valid
     # TODO: Improve project name stuff (don't require a file type, give a user a list of projects to choose from)
@@ -407,7 +409,7 @@ def strip_trailing_slashes(input):
 # These commands are for using the Diffy API
 
 def get_default_headers_from_diffy():
-    payload = {"key": "816e6d80f424c910b4f05cf1e34d994c"}
+    payload = {"key": DIFFY_API_KEY}
     response = requests.post("https://app.diffy.website/api/auth/key", data=json.dumps(payload))
     token = json.loads(response.text)["token"]
     abt = "Bearer " + token
